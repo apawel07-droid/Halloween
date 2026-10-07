@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Halloween Party</title>
+    <link rel="preconnect" href="https://open.spotify.com" />
+    <link rel="preconnect" href="https://www.youtube.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --bg-dark: #090514;
+        --bg-panel: #140c26;
+        --orange: #ff6600;
+        --orange-glow: rgba(255, 102, 0, 0.4);
+        --purple: #8b5cf6;
+        --purple-glow: rgba(139, 92, 246, 0.3);
+        --text-main: #f3f4f6;
+        --text-muted: #9ca3af;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      h1, h2, h3, .eyebrow {
+        font-family: 'Creepster', cursive, sans-serif;
+        letter-spacing: 0.05em;
+      }
+
+      #party-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .app-shell {
+        position: relative;
+        z-index: 10;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem 4rem 1rem;
+      }
+
+      /* Hero & Scene */
+      .hero {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        background: linear-gradient(180deg, rgba(20, 12, 38, 0.85) 0%, rgba(13, 8, 25, 0.95) 100%);
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 25px var(--purple-glow);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero__content .eyebrow {
+        color: var(--orange);
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 10px var(--orange-glow);
+      }
+
+      .hero__content h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0 0 1rem 0;
+        text-shadow: 0 0 20px var(--purple);
+      }
+
+      .hero__copy {
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+        font-size: 1.05rem;
+      }
+
+      /* Halloween scene decorations */
+      .halloween-scene {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        margin: 1.5rem 0;
+        position: relative;
+      }
+
+      .moon {
+        width: 70px;
+        height: 70px;
+        background: #fef08a;
+        border-radius: 50%;
+        box-shadow: 0 0 30px #fef08a, 0 0 60px rgba(254, 240, 138, 0.5);
+        display: inline-block;
+      }
+
+      .pumpkin {
+        width: 45px;
+        height: 40px;
+        background: var(--orange);
+        border-radius: 50% 50% 45% 45%;
+        position: relative;
+        display: inline-block;
+        box-shadow: 0 0 15px var(--orange-glow);
+        animation: floatPumpkin 3s ease-in-out infinite;
+      }
+
+      .pumpkin--two {
+        animation-delay: 1.5s;
+      }
+
+      @keyframes floatPumpkin {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+
+      .pumpkin__eye {
+        width: 8px;
+        height: 8px;
+        background: #090514;
+        position: absolute;
+        top: 12px;
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      }
+
+      .pumpkin__eye--left { left: 10px; }
+      .pumpkin__eye--right { right: 10px; }
+
+      .pumpkin__smile {
+        width: 20px;
+        height: 8px;
+        background: #090514;
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 0 0 10px 10px;
+      }
+
+      /* Countdown */
+      .countdown {
+        background: rgba(9, 5, 20, 0.7);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border: 1px solid rgba(255, 102, 0, 0.2);
+      }
+
+      .countdown__status {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .countdown__grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        max-width: 450px;
+        margin: 0 auto 1rem auto;
+      }
+
+      .time-tile {
+        background: rgba(20, 12, 38, 0.9);
+        border: 1px solid var(--purple);
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        text-align: center;
+        box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.2);
+      }
+
+      .time-tile strong {
+        display: block;
+        font-size: 1.8rem;
+        color: var(--orange);
+        font-family: 'Creepster', cursive;
+      }
+
+      .time-tile span {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+
+      .party-time {
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin: 0;
+      }
+
+      /* Navigation Tabs */
+      .tabs {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+        background: rgba(20, 12, 38, 0.9);
+        padding: 0.5rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+      }
+
+      .tab {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 0.85rem 1rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .tab:hover {
+        color: #fff;
+        background: rgba(139, 92, 246, 0.15);
+      }
+
+      .tab.is-active {
+        background: var(--purple);
+        color: #fff;
+        box-shadow: 0 0 15px var(--purple-glow);
+      }
+
+      /* Panels */
+      .panel {
+        display: none;
+        background: var(--bg-panel);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      }
+
+      .panel.is-active {
+        display: block;
+        animation: fadeIn 0.4s ease forwards;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1rem;
+      }
+
+      .section-heading h2 {
+        margin: 0;
+        font-size: 2rem;
+        color: #fff;
+      }
+
+      .section-heading .eyebrow {
+        color: var(--orange);
+        margin: 0 0 0.25rem 0;
+        font-size: 1.1rem;
+      }
+
+      #photo-count, #song-count, #admin-status, #admin-media-count, #admin-song-count {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      /* Forms & Inputs */
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      @media(max-width: 640px) {
+        .form-row { grid-template-columns: 1fr; }
+        .countdown__grid { grid-template-columns: repeat(2, 1fr); }
+        .hero__content h1 { font-size: 2.5rem; }
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+
+      input[type="text"], input[type="url"], input[type="password"] {
+        background: rgba(9, 5, 20, 0.8);
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        border-radius: 0.75rem;
+        padding: 0.85rem 1rem;
+        color: #fff;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+
+      input:focus {
+        border-color: var(--orange);
+        box-shadow: 0 0 10px var(--orange-glow);
+      }
+
+      /* Drop Zone */
+      .drop-zone {
+        border: 2px dashed rgba(139, 92, 246, 0.5);
+        border-radius: 1rem;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        background: rgba(9, 5, 20, 0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .drop-zone:hover {
+        border-color: var(--orange);
+        background: rgba(255, 102, 0, 0.05);
+      }
+
+      .drop-zone input[type="file"] {
+        display: none;
+      }
+
+      .drop-zone__icon {
+        font-size: 2.5rem;
+        color: var(--orange);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-family: 'Creepster', cursive;
+      }
+
+      .drop-zone__title {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.25rem;
+      }
+
+      .drop-zone__hint {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      /* Primary Action Button */
+      .primary-action {
+        background: linear-gradient(135deg, var(--orange), #ea580c);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 15px var(--orange-glow);
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-align: center;
+      }
+
+      .primary-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--orange-glow);
+      }
+
+      .save-note {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin: 0;
+      }
+
+      /* Photo Preview */
+      .photo-preview {
+        background: rgba(9, 5, 20, 0.6);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .photo-preview__head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+      }
+
+      .photo-preview__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.5rem;
+        max-height: 220px;
+        overflow-y: auto;
+      }
+
+      .preview-thumb {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        border: 1px solid var(--purple);
+      }
+
+      /* Gallery Grid */
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .photo-card {
+        background: rgba(9, 5, 20, 0.7);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s;
+        position: relative;
+      }
+
+      .photo-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--orange);
+      }
+
+      .serial-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(9, 5, 20, 0.85);
+        color: var(--orange);
+        border: 1px solid var(--orange);
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        z-index: 5;
+        letter-spacing: 0.05em;
+        font-family: monospace;
+      }
+
+      .photo-card__media {
+        height: 180px;
+        background: #000;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .photo-card__media img, .photo-card__media video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .photo-card__meta {
+        padding: 1rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .photo-card__meta strong {
+        color: #fff;
+        font-size: 1rem;
+      }
+
+      .photo-card__meta span {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .photo-card__actions {
+        padding: 0.75rem 1rem;
+        background: rgba(20, 12, 38, 0.5);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .download-link {
+        color: var(--orange);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .download-link:hover {
+        text-decoration: underline;
+      }
+
+      /* Song List */
+      .song-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .song-card {
+        background: rgba(9, 5, 20, 0.7);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .song-card__topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .platform-badge {
+        background: var(--purple);
+        color: #fff;
+        padding: 0.2rem 0.6rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+      }
+
+      .song-card h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: #fff;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 700;
+      }
+
+      .song-card__note {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      .song-card__embed iframe {
+        width: 100%;
+        height: 152px;
+        border-radius: 0.75rem;
+        border: none;
+      }
+
+      .song-card__link {
+        color: var(--orange);
+        font-size: 0.85rem;
+        text-decoration: none;
+        font-weight: 600;
+        width: fit-content;
+      }
+
+      .song-card__link:hover { text-decoration: underline; }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .empty-state strong {
+        color: #fff;
+        font-size: 1.1rem;
+      }
+
+      /* Lightbox */
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(9, 5, 20, 0.95);
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        border: none;
+        width: 100%;
+        height: 100%;
+      }
+
+      .lightbox:not([open]) {
+        display: none;
+      }
+
+      .lightbox img {
+        max-width: 90vw;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 0.75rem;
+        box-shadow: 0 0 30px rgba(0,0,0,0.9);
+      }
+
+      .lightbox__close {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 2.5rem;
+        cursor: pointer;
+      }
+
+      .lightbox p {
+        color: #fff;
+        margin-top: 1rem;
+        font-size: 1.1rem;
+      }
+
+      /* Admin Panel Tools */
+      .admin-tools {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .admin-section {
+        background: rgba(9, 5, 20, 0.5);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1rem;
+        padding: 1.25rem;
+      }
+
+      .admin-section__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding-bottom: 0.5rem;
+      }
+
+      .admin-section__head h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #fff;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+
+      .admin-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-height: 350px;
+        overflow-y: auto;
+      }
+
+      .admin-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(20, 12, 38, 0.8);
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+      }
+
+      .admin-item__info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+
+      .admin-item__info strong {
+        color: #fff;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .admin-serial-tag {
+        background: var(--orange);
+        color: #090514;
+        padding: 0.1rem 0.4rem;
+        border-radius: 0.3rem;
+        font-size: 0.75rem;
+        font-family: monospace;
+        font-weight: 700;
+      }
+
+      .admin-item__info span {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      .btn-danger {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.4);
+      }
+
+      .upload-progress {
+        color: var(--orange);
+        font-size: 0.9rem;
+        text-align: center;
+        font-weight: 600;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="party-canvas" aria-hidden="true"></canvas>
+
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="party-title">
+        <div class="hero__content">
+          <p class="eyebrow">Galeria oraz Playlista</p>
+          <h1 id="party-title">Halloween Party</h1>
+          <p class="hero__copy">
+            Przesylaj dowolna liczbe zdjec i wideo, dziel sie swoimi propozycjami muzycznymi
+          </p>
+        </div>
+
+        <div class="halloween-scene" aria-hidden="true">
+          <span class="moon"></span>
+          <span class="pumpkin pumpkin--one">
+            <span class="pumpkin__eye pumpkin__eye--left"></span>
+            <span class="pumpkin__eye pumpkin__eye--right"></span>
+            <span class="pumpkin__smile"></span>
+          </span>
+          <span class="pumpkin pumpkin--two">
+            <span class="pumpkin__eye pumpkin__eye--left"></span>
+            <span class="pumpkin__eye pumpkin__eye--right"></span>
+            <span class="pumpkin__smile"></span>
+          </span>
+        </div>
+
+        <section class="countdown" aria-label="Countdown to party">
+          <div class="countdown__status" id="countdown-status">Zaczynamy za</div>
+          <div class="countdown__grid" id="countdown-grid">
+            <div class="time-tile">
+              <strong id="days">00</strong>
+              <span>dni</span>
+            </div>
+            <div class="time-tile">
+              <strong id="hours">00</strong>
+              <span>godzin</span>
+            </div>
+            <div class="time-tile">
+              <strong id="minutes">00</strong>
+              <span>min</span>
+            </div>
+            <div class="time-tile">
+              <strong id="seconds">00</strong>
+              <span>sec</span>
+            </div>
+          </div>
+          <p class="party-time">24 Pazdziernik, 2026, 19:30</p>
+        </section>
+      </section>
+
+      <nav class="tabs" aria-label="Site sections">
+        <button class="tab is-active" type="button" data-tab="gallery">
+          <span aria-hidden="true">+</span>
+          Zdjęcia i Filmy
+        </button>
+        <button class="tab" type="button" data-tab="music">
+          <span aria-hidden="true">&#9835;</span>
+          Muzyka
+        </button>
+        <button class="tab" type="button" data-tab="admin">
+          <span aria-hidden="true">!</span>
+          Admin
+        </button>
+      </nav>
+
+      <section class="panel is-active" id="gallery-panel" data-panel="gallery">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Galeria zdjec </p>
+            <h2>Wasze filmy i zdjecia </h2>
+          </div>
+          <p id="photo-count">0 plikow </p>
+        </div>
+
+        <form class="uploader" id="photo-form">
+          <label class="drop-zone" for="photo-input">
+            <input id="photo-input" name="media" type="file" accept="image/*,video/*" multiple />
+            <span class="drop-zone__icon" aria-hidden="true">+</span>
+            <span class="drop-zone__title">Dodaj nieskończoną liczbe zdjęc i filmów</span>
+            <span class="drop-zone__hint">Wybierz dowolna liczbe plikow - kazdy otzrymuje unikalny identyfikator</span>
+          </label>
+
+          <div class="photo-preview" id="photo-preview" hidden>
+            <div class="photo-preview__head">
+              <strong>twoje pliki</strong>
+              <span id="photo-preview-count"></span>
+            </div>
+            <div class="photo-preview__grid" id="photo-preview-grid"></div>
+          </div>
+
+          <div class="form-row">
+            <label>
+              Twoje imie
+              <input id="photo-author" type="text" maxlength="36" placeholder="np oskar" />
+            </label>
+            <label>
+              Opis zdjecia/filmu
+              <input id="photo-caption" type="text" maxlength="90" placeholder="tu walimy wóde " />
+            </label>
+          </div>
+
+          <button class="primary-action" type="submit" id="submit-btn">Dodaj do galeri</button>
+          <div id="upload-progress" class="upload-progress" hidden>Processing files... Please wait.</div>
+          <p class="save-note">Guests can view and download files. Deletion is restricted to the admin panel.</p>
+        </form>
+
+        <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
+        <div class="empty-state" id="gallery-empty">
+          <strong>Czekamy na wasze pierwsze zdjecia</strong>
+          <span>Wybierz plik powyzej i zapisz je w galeri </span>
+        </div>
+      </section>
+
+      <section class="panel" id="music-panel" data-panel="music">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Propozycje nutek</p>
+            <h2>Twoje propozycje nutek</h2>
+          </div>
+          <p id="song-count">0</p>
+        </div>
+
+        <form class="music-form" id="music-form">
+          <div class="form-row">
+            <label>
+              Artysta i tytul
+              <input id="song-title" type="text" maxlength="90" required placeholder="np Żabson - COWABONGA
+" />
+            </label>
+            <label>
+              YouTube lub Spotify Link (opcjonalnie)
+              <input id="song-link" type="url" placeholder="optional: https://..." />
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>
+              Propozycja od 
+              <input id="song-author" type="text" maxlength="36" placeholder="np Oskar" />
+            </label>
+            <label>
+              Komentarz
+              <input id="song-note" type="text" maxlength="100" placeholder="np Jebnie basem" />
+            </label>
+          </div>
+
+          <button class="primary-action" type="submit">Add proposal</button>
+          <p class="save-note"></p>
+        </form>
+
+        <div class="song-list" id="song-list" aria-live="polite"></div>
+        <div class="empty-state" id="songs-empty">
+          <strong>Playlista jest jeszcze pusta</strong>
+          <span>Dodaj swoją propozycje</span>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-panel" data-panel="admin">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Admin Panel</p>
+            <h2>Site Management</h2>
+          </div>
+          <p id="admin-status">Locked</p>
+        </div>
+
+        <form class="admin-login" id="admin-login-form">
+          <label>
+            Access Code
+            <input id="admin-pin" type="password" autocomplete="current-password" placeholder="Enter access code" />
+          </label>
+          <button class="primary-action" type="submit">Log in to panel</button>
+          <p class="save-note" id="admin-message">Enter your private access code to manage content.</p>
+        </form>
+
+        <div class="admin-tools" id="admin-tools" hidden>
+          <section class="admin-section" aria-labelledby="admin-media-title">
+            <div class="admin-section__head">
+              <h3 id="admin-media-title">Zdjecia i filmy</h3>
+              <span id="admin-media-count">0 </span>
+            </div>
+            <div class="admin-list" id="admin-media-list"></div>
+          </section>
+
+          <section class="admin-section" aria-labelledby="admin-song-title">
+            <div class="admin-section__head">
+              <h3 id="admin-song-title">Propozycje nutek</h3>
+              <span id="admin-song-count">0 propozycji</span>
+            </div>
+            <div class="admin-list" id="admin-song-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="lightbox" id="lightbox">
+      <button class="lightbox__close" id="lightbox-close" type="button" aria-label="Close preview">&times;</button>
+      <img id="lightbox-image" alt="" />
+      <p id="lightbox-caption"></p>
+    </dialog>
+
+    <template id="photo-template">
+      <article class="photo-card">
+        <span class="serial-badge"></span>
+        <div class="photo-card__media"></div>
+        <div class="photo-card__meta">
+          <strong></strong>
+          <span></span>
+        </div>
+        <div class="photo-card__actions">
+          <a class="download-link" download>Pobierz</a>
+        </div>
+      </article>
+    </template>
+
+    <template id="song-template">
+      <article class="song-card">
+        <div class="song-card__topline">
+          <span class="platform-badge"></span>
+          <time></time>
+        </div>
+        <h3></h3>
+        <p class="song-card__note"></p>
+        <div class="song-card__embed"></div>
+        <a class="song-card__link" target="_blank" rel="noreferrer">Otworz link</a>
+      </article>
+    </template>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. CANVAS BACKGROUND ANIMATION ---
+        const canvas = document.getElementById('party-canvas');
+        const ctx = canvas.getContext('2d');
+        let width = (canvas.width = window.innerWidth);
+        let height = (canvas.height = window.innerHeight);
+
+        window.addEventListener('resize', () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const particleCount = 45;
+
+        for (let i = 0; i < particleCount; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 2.5 + 0.5,
+            color: Math.random() > 0.5 ? '#ff6600' : '#8b5cf6',
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: -Math.random() * 0.7 - 0.2,
+            alpha: Math.random() * 0.7 + 0.2
+          });
+        }
+
+        function animateCanvas() {
+          ctx.clearRect(0, 0, width, height);
+          particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.y < 0) {
+              p.y = height + 10;
+              p.x = Math.random() * width;
+            }
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.alpha;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = p.color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          });
+          requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // --- 2. COUNTDOWN TO OCTOBER 24, 2026, 19:30 ---
+        const partyDate = new Date('2026-10-24T19:30:00');
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const countdownStatus = document.getElementById('countdown-status');
+
+        function updateCountdown() {
+          const now = new Date();
+          const diff = partyDate - now;
+
+          if (diff <= 0) {
+            countdownStatus.textContent = 'Party is live!';
+            daysEl.textContent = '00';
+            hoursEl.textContent = '00';
+            minutesEl.textContent = '00';
+            secondsEl.textContent = '00';
+            return;
+          }
+
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((diff / 1000 / 60) % 60);
+          const seconds = Math.floor((diff / 1000) % 60);
+
+          daysEl.textContent = String(days).padStart(2, '0');
+          hoursEl.textContent = String(hours).padStart(2, '0');
+          minutesEl.textContent = String(minutes).padStart(2, '0');
+          secondsEl.textContent = String(seconds).padStart(2, '0');
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // --- 3. TABS NAVIGATION ---
+        const tabs = document.querySelectorAll('.tab');
+        const panels = document.querySelectorAll('.panel');
+
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const target = tab.dataset.tab;
+            tabs.forEach(t => t.classList.remove('is-active'));
+            panels.forEach(p => p.classList.remove('is-active'));
+
+            tab.classList.add('is-active');
+            document.getElementById(`${target}-panel`).classList.add('is-active');
+          });
+        });
+
+        // --- 4. STATE MANAGEMENT & SERIAL NUMBER COUNTER ---
+        let photos = JSON.parse(localStorage.getItem('hw_photos')) || [];
+        let songs = JSON.parse(localStorage.getItem('hw_songs')) || [];
+        let mediaCounter = parseInt(localStorage.getItem('hw_media_counter'), 10) || photos.length;
+        let isAdminLoggedIn = false;
+
+        function saveState() {
+          try {
+            localStorage.setItem('hw_photos', JSON.stringify(photos));
+            localStorage.setItem('hw_songs', JSON.stringify(songs));
+            localStorage.setItem('hw_media_counter', mediaCounter);
+          } catch (err) {
+            console.warn('Storage limit reached, keeping items safely in memory.');
+          }
+          renderGallery();
+          renderSongs();
+          if (isAdminLoggedIn) renderAdminTools();
+        }
+
+        // --- 5. UNLIMITED MULTI-FILE GALLERY & BATCH PROCESSING ---
+        const photoInput = document.getElementById('photo-input');
+        const photoPreview = document.getElementById('photo-preview');
+        const photoPreviewGrid = document.getElementById('photo-preview-grid');
+        const photoPreviewCount = document.getElementById('photo-preview-count');
+        const photoForm = document.getElementById('photo-form');
+        const galleryGrid = document.getElementById('gallery-grid');
+        const galleryEmpty = document.getElementById('gallery-empty');
+        const photoCount = document.getElementById('photo-count');
+        const uploadProgress = document.getElementById('upload-progress');
+        const submitBtn = document.getElementById('submit-btn');
+
+        let stagedFiles = [];
+
+        photoInput.addEventListener('change', e => {
+          stagedFiles = Array.from(e.target.files);
+          if (stagedFiles.length === 0) {
+            photoPreview.hidden = true;
+            return;
+          }
+
+          photoPreview.hidden = false;
+          photoPreviewCount.textContent = `${stagedFiles.length} files selected`;
+          photoPreviewGrid.innerHTML = '';
+
+          stagedFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+              const thumb = document.createElement(file.type.startsWith('video') ? 'video' : 'img');
+              thumb.src = ev.target.result;
+              thumb.className = 'preview-thumb';
+              photoPreviewGrid.appendChild(thumb);
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+
+        photoForm.addEventListener('submit', e => {
+          e.preventDefault();
+          if (stagedFiles.length === 0) return;
+
+          const author = document.getElementById('photo-author').value.trim() || 'Guest';
+          const caption = document.getElementById('photo-caption').value.trim() || 'Party memory';
+
+          submitBtn.disabled = true;
+          uploadProgress.hidden = false;
+          uploadProgress.textContent = `Processing 0 / ${stagedFiles.length} files...`;
+
+          let processedCount = 0;
+          const newEntries = [];
+
+          // Process each file sequentially to guarantee clean serial numbering & memory safety
+          function processNextFile(index) {
+            if (index >= stagedFiles.length) {
+              // All files processed successfully
+              photos = newEntries.concat(photos);
+              stagedFiles = [];
+              photoInput.value = '';
+              photoPreview.hidden = true;
+              document.getElementById('photo-author').value = '';
+              document.getElementById('photo-caption').value = '';
+              submitBtn.disabled = false;
+              uploadProgress.hidden = true;
+              saveState();
+              return;
+            }
+
+            const file = stagedFiles[index];
+            mediaCounter++;
+            const serialNum = '#PHOTO-' + String(mediaCounter).padStart(3, '0');
+
+            const reader = new FileReader();
+            reader.onload = ev => {
+              const base64Data = ev.target.result;
+              
+              // Optional image downscaling helper if image is gigantic
+              if (file.type.startsWith('image')) {
+                const img = new Image();
+                img.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  let width = img.width;
+                  let height = img.height;
+                  const MAX_DIM = 1200;
+                  if (width > height && width > MAX_DIM) {
+                    height *= MAX_DIM / width;
+                    width = MAX_DIM;
+                  } else if (height > MAX_DIM) {
+                    width *= MAX_DIM / height;
+                    height = MAX_DIM;
+                  }
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx2 = canvas.getContext('2d');
+                  ctx2.drawImage(img, 0, 0, width, height);
+                  const optimizedUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+                  newEntries.push({
+                    id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    serial: serialNum,
+                    url: optimizedUrl,
+                    type: 'image',
+                    author: author,
+                    caption: caption,
+                    date: new Date().toLocaleDateString('en-GB')
+                  });
+
+                  processedCount++;
+                  uploadProgress.textContent = `Processing ${processedCount} / ${stagedFiles.length} files...`;
+                  processNextFile(index + 1);
+                };
+                img.onerror = () => {
+                  // Fallback if image load fails
+                  newEntries.push({
+                    id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    serial: serialNum,
+                    url: base64Data,
+                    type: 'image',
+                    author: author,
+                    caption: caption,
+                    date: new Date().toLocaleDateString('en-GB')
+                  });
+                  processedCount++;
+                  uploadProgress.textContent = `Processing ${processedCount} / ${stagedFiles.length} files...`;
+                  processNextFile(index + 1);
+                };
+                img.src = base64Data;
+              } else {
+                // Video or other media
+                newEntries.push({
+                  id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                  serial: serialNum,
+                  url: base64Data,
+                  type: 'video',
+                  author: author,
+                  caption: caption,
+                  date: new Date().toLocaleDateString('en-GB')
+                });
+                processedCount++;
+                uploadProgress.textContent = `Processing ${processedCount} / ${stagedFiles.length} files...`;
+                processNextFile(index + 1);
+              }
+            };
+            reader.onerror = () => {
+              processedCount++;
+              processNextFile(index + 1);
+            };
+            reader.readAsDataURL(file);
+          }
+
+          processNextFile(0);
+        });
+
+        function renderGallery() {
+          galleryGrid.innerHTML = '';
+          photoCount.textContent = `${photos.length} items`;
+
+          if (photos.length === 0) {
+            galleryEmpty.style.display = 'flex';
+            return;
+          }
+          galleryEmpty.style.display = 'none';
+
+          const template = document.getElementById('photo-template');
+          photos.forEach(p => {
+            const clone = template.content.cloneNode(true);
+            const mediaContainer = clone.querySelector('.photo-card__media');
+
+            clone.querySelector('.serial-badge').textContent = p.serial || '#PHOTO-000';
+
+            if (p.type === 'video') {
+              const vid = document.createElement('video');
+              vid.src = p.url;
+              vid.controls = true;
+              mediaContainer.appendChild(vid);
+            } else {
+              const img = document.createElement('img');
+              img.src = p.url;
+              img.alt = p.caption;
+              mediaContainer.appendChild(img);
+              mediaContainer.addEventListener('click', () => openLightbox(p.url, `${p.caption} (${p.serial}) — ${p.author}`));
+            }
+
+            clone.querySelector('.photo-card__meta strong').textContent = p.caption;
+            clone.querySelector('.photo-card__meta span').textContent = `By: ${p.author} (${p.date})`;
+            
+            const dl = clone.querySelector('.download-link');
+            dl.href = p.url;
+            dl.download = `halloween-${p.serial || 'media'}`;
+
+            galleryGrid.appendChild(clone);
+          });
+        }
+
+        // --- 6. LIGHTBOX ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+
+        function openLightbox(url, caption) {
+          lightboxImage.src = url;
+          lightboxCaption.textContent = caption;
+          lightbox.showModal();
+        }
+
+        lightboxClose.addEventListener('click', () => lightbox.close());
+        lightbox.addEventListener('click', e => {
+          if (e.target === lightbox) lightbox.close();
+        });
+
+        // --- 7. MUSIC PROPOSALS & EMBED DETECTION ---
+        const musicForm = document.getElementById('music-form');
+        const songList = document.getElementById('song-list');
+        const songsEmpty = document.getElementById('songs-empty');
+        const songCount = document.getElementById('song-count');
+
+        musicForm.addEventListener('submit', e => {
+          e.preventDefault();
+          const title = document.getElementById('song-title').value.trim();
+          const link = document.getElementById('song-link').value.trim();
+          const author = document.getElementById('song-author').value.trim() || 'Guest';
+          const note = document.getElementById('song-note').value.trim();
+
+          if (!title) return;
+
+          songs.push({
+            id: 's_' + Date.now() + Math.random().toString(36).substr(2, 5),
+            title,
+            link,
+            author,
+            note,
+            date: new Date().toLocaleDateString('en-GB')
+          });
+
+          document.getElementById('song-title').value = '';
+          document.getElementById('song-link').value = '';
+          document.getElementById('song-author').value = '';
+          document.getElementById('song-note').value = '';
+
+          saveState();
+        });
+
+        function parseEmbedUrl(url) {
+          if (!url) return { platform: 'Custom proposal', embed: null };
+          
+          const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+          if (ytMatch && ytMatch[1]) {
+            return {
+              platform: 'YouTube',
+              embed: `https://www.youtube.com/embed/${ytMatch[1]}`
+            };
+          }
+
+          const spotMatch = url.match(/spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+          if (spotMatch && spotMatch[1] && spotMatch[2]) {
+            return {
+              platform: 'Spotify',
+              embed: `https://open.spotify.com/embed/${spotMatch[1]}/${spotMatch[2]}`
+            };
+          }
+
+          return { platform: 'External link', embed: null };
+        }
+
+        function renderSongs() {
+          songList.innerHTML = '';
+          songCount.textContent = `${songs.length} proposals`;
+
+          if (songs.length === 0) {
+            songsEmpty.style.display = 'flex';
+            return;
+          }
+          songsEmpty.style.display = 'none';
+
+          const template = document.getElementById('song-template');
+          songs.forEach(s => {
+            const clone = template.content.cloneNode(true);
+            const parsed = parseEmbedUrl(s.link);
+
+            clone.querySelector('.platform-badge').textContent = parsed.platform;
+            clone.querySelector('time').textContent = `${s.author} • ${s.date}`;
+            clone.querySelector('h3').textContent = s.title;
+            clone.querySelector('.song-card__note').textContent = s.note ? `Comment: ${s.note}` : '';
+
+            const embedContainer = clone.querySelector('.song-card__embed');
+            if (parsed.embed) {
+              const iframe = document.createElement('iframe');
+              iframe.src = parsed.embed;
+              iframe.allow = 'encrypted-media; fullscreen; picture-in-picture';
+              embedContainer.appendChild(iframe);
+            }
+
+            const linkEl = clone.querySelector('.song-card__link');
+            if (s.link) {
+              linkEl.href = s.link;
+            } else {
+              linkEl.style.display = 'none';
+            }
+
+            songList.appendChild(clone);
+          });
+        }
+
+        // --- 8. ADMIN LOGIN & MANAGEMENT WITH SERIAL BADGES ---
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminTools = document.getElementById('admin-tools');
+        const adminStatus = document.getElementById('admin-status');
+        const adminMessage = document.getElementById('admin-message');
+
+        adminLoginForm.addEventListener('submit', e => {
+          e.preventDefault();
+          const pin = document.getElementById('admin-pin').value.trim();
+
+          if (pin === '1313') {
+            isAdminLoggedIn = true;
+            adminLoginForm.hidden = true;
+            adminTools.hidden = false;
+            adminStatus.textContent = 'Logged in as Admin';
+            renderAdminTools();
+          } else {
+            adminMessage.textContent = 'Incorrect access code! Please try again.';
+            adminMessage.style.color = '#f87171';
+          }
+        });
+
+        function renderAdminTools() {
+          const mediaList = document.getElementById('admin-media-list');
+          const songListAdmin = document.getElementById('admin-song-list');
+          
+          document.getElementById('admin-media-count').textContent = `${photos.length} items`;
+          document.getElementById('admin-song-count').textContent = `${songs.length} proposals`;
+
+          mediaList.innerHTML = '';
+          photos.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'admin-item';
+            item.innerHTML = `
+              <div class="admin-item__info">
+                <strong>
+                  <span class="admin-serial-tag">${p.serial || '#PHOTO'}</span>
+                  ${p.caption}
+                </strong>
+                <span>Author: ${p.author} • ${p.date}</span>
+              </div>
+              <button class="btn-danger" data-id="${p.id}" data-type="photo">Delete</button>
+            `;
+            mediaList.appendChild(item);
+          });
+
+          songListAdmin.innerHTML = '';
+          songs.forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'admin-item';
+            item.innerHTML = `
+              <div class="admin-item__info">
+                <strong>${s.title}</strong>
+                <span>Proposal by: ${s.author}</span>
+              </div>
+              <button class="btn-danger" data-id="${s.id}" data-type="song">Delete</button>
+            `;
+            songListAdmin.appendChild(item);
+          });
+
+          document.querySelectorAll('.btn-danger').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = btn.dataset.id;
+              const type = btn.dataset.type;
+
+              if (type === 'photo') {
+                photos = photos.filter(p => p.id !== id);
+              } else {
+                songs = songs.filter(s => s.id !== id);
+              }
+              saveState();
+            });
+          });
+        }
+
+        renderGallery();
+        renderSongs();
+      });
+    </script>
+  </body>
+</html>
